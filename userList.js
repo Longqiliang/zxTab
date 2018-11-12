@@ -102,6 +102,7 @@
 
   if ($.fn) {
 		$.fn.tab = function(options) {
+      console.log(this, options)
       this.each(function(i, element) {
         if (i === 0) {
           if (element.tab) {
@@ -298,7 +299,11 @@
 (function ($, document) {
 
   var panelBuffer = `<div class="zx-layout">
-    <div class="zx-tab-container"></div>
+    <div class="zx-tab-container">
+      <div class="zx-tab-content active" data-id="tab-c">
+      
+      </div>
+    </div>
     <div class="zx-tab-footer">
       <button class="zx-btn zx-btn-default zx-tab-btn-ok" data-id="btn-cancel">取消</button>
       <span class="zx-tab-footer-txt">已选择<span class="zx-tab-footer-num">0</span>人</span>
@@ -339,18 +344,15 @@
       }, false)
       self._create(options)
     },
-    _createUserList: function () {
+    _createConcacts: function () {
       var self = this
       var options = self.options
-      console.log(options)
       var ui = self.ui
+      console.log(self, ui.c.tab)
       if (options.userList) {
         uArray = options.userList
       }
       ui.c.tab.setUserItems(uArray)
-    },
-    _createConcacts: function () {
-
     },
     _createDepartment: function () {
 
@@ -362,8 +364,9 @@
       var self = this
       options = options || {}
       options.userList = options.userList
+      self.options = options
       var ui = self.ui
-      self._createUserList()
+      self._createConcacts()
     },
     //显示
     show: function (callback) {
