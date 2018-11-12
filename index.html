@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>人员选择</title>
+  <link rel="stylesheet" href="assets/css/userList.css">
+
+
+</head>
+
+<body>
+  <div>
+    <!-- <div class="zx-layout">
+      <div class="zx-tab">
+        <a class="zx-tab-item active" >常用联系人</a>
+        <a class="zx-tab-item" >部门成员</a>
+      </div>
+      <div class="zx-tab-container">
+        <div class="zx-tab-content active" data-id="tab-c">
+          <ul class="zx-picker-list">
+            <li class="zx-picker-list-item">
+              <div class="item-img-box">
+                <img src="http://p.qlogo.cn/bizmail/x9pfWRy6WOVAOwTyqeXgfUluuqm7dEHaZP4A8ztY2BONWiamwFYWoGA/0" >
+              </div>
+              <div class="item-content item-checkbox ellipsis">
+                <input type="checkbox" class="zx-checked" name="checkbox1">
+                <span>陈芳民</span>
+              </div>
+            </li>
+            <li class="zx-picker-list-item"></li>
+            <li class="zx-picker-list-item"></li>
+          </ul>
+        </div>
+        <div class="zx-tab-content"  data-id="tab-d">
+          
+        </div>
+      </div>
+      <div class="zx-tab-footer">
+        <button class="zx-btn zx-btn-default zx-tab-btn-ok">取消</button>
+        <span class="zx-tab-footer-txt">已选择<span class="zx-tab-footer-num">1</span>人</span>
+        <button class="zx-btn zx-btn-info zx-tab-btn-ok">确定</button>
+      </div>
+    </div> -->
+    <div id="btn">增加成员</div>
+  </div>
+  <script src="jquery.min.js"></script>
+  <script src="userList.js"></script>
+  <script>
+
+    $(function() {
+      var $btn = $('#btn')
+      $btn.on('click',function (e) {
+        e.preventDefault()
+        var _self = this
+        if(_self.zxtab) {
+
+        } else {
+          var userList = [{name: '111',img: '/img/1.png'}]
+          var options = {
+            userList: userList
+          }
+          _self.zxtab = new $.PopTab(options)
+          _self.zxtab.show(function(rs) {
+            console.log(rs)
+            _self.zxtab.dispose()
+						_self.zxtab = null
+          })
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>
