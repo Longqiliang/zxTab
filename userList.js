@@ -45,9 +45,10 @@
   var UserList = $.UserList = function (holder, items) {
     var self = this
     self.holder = holder
-    self.items = items || []
+    self.items = []
+    self.selectList = items.selectList || []
+    self.user = items.user || []
     self.init()
-
 
   }
 
@@ -64,55 +65,82 @@
 
   }
 
+  UserList.prototype.triggerChange = function (force) {
+    var self = this
+    var items = self.items
+    var selectList = self.selectList
+    for (var item in items) {
+      for ( var select in selectList) {
+        if(selectList[select].userid === items[item].userid) {
+          var checkbox = self.holder.querySelector('input[type=checkbox]')
+          $(checkbox).click()
+        }
+      }
+    }
+  }
+
   UserList.prototype.setUserItems = function (items) {
     var self = this
     self.items = items || []
     var buffer = []
     self.items.forEach(function (item) {
       if (item) {
-        var itemDom = '<li class="zx-tab-list-item">\
+        var itemDom = '<li class="zx-picker-list-item">\
               <div class="item-img-box">\
-                <img src="' + item.img + '" >\
+                <img src="' + item.imgurl + '" >\
               </div>\
               <div class="item-content item-checkbox ellipsis">\
-                <input type="checkbox" class="zx-checked" name="checkbox1">\
-                <span>' + item.name + '</span>\
+                <input type="checkbox" class="zx-checked" name="checkbox1" value="'+ item.userid +'">\
+                <span>' + item.nickname + '</span>\
               </div>\
             </li>'
         buffer.push(itemDom)
       }
     })
     self.list.innerHTML = buffer.join('')
-
+    self.findElementItems()
+    self.triggerChange(true)
   }
 
-  UserList.prototype.setDeptItems = function () {
-
+  UserList.prototype.setAllUserItems = function (item) {
+    var self = this
+    self.items = items || []
+    var buffer = []
   }
 
   UserList.prototype.setSelectedUserItem = function () {
     var self = this
     return self.items
+
+
   }
 
   UserList.prototype.getSelectedUserItem = function () {
-
+    var self = this
+    console.log(self)
+    return self.items
   }
 
+  UserList.prototype.getSelectedAllItem = function () {
+    var self = this
+    return self.items
+  }
+
+  UserList.prototype.getSelectedItems = function () {
+    var self = this
+    return self.items
+  }
 
   if ($.fn) {
 		$.fn.tab = function(options) {
-      console.log(this, options)
       this.each(function(i, element) {
-        if (i === 0) {
-          if (element.tab) {
-            return
-          }
-          if (options) {
-            element.tab = new UserList(element, options)
-          } else {
-            element.tab = new UserList(element)
-          }
+        if (element.tab) {
+          return
+        }
+        if (options) {
+          element.tab = new UserList(element, options)
+        } else {
+          element.tab = new UserList(element)
         }
       })	
       return this[0] ? this[0].tab : null;
@@ -299,9 +327,26 @@
 (function ($, document) {
 
   var panelBuffer = `<div class="zx-layout">
+    <div class="zx-tab">
+      <a class="zx-tab-item active" href="#tab-c">常用联系人</a>
+      <a class="zx-tab-item" href="#tab-d">部门成员</a>
+      <a class="zx-tab-item" href="#tab-a">全部成员</a>
+    </div>
     <div class="zx-tab-container">
       <div class="zx-tab-content active" data-id="tab-c">
-      
+        <ul class="zx-picker-list">
+          
+        </ul>
+      </div>
+      <div class="zx-tab-content" data-id="tab-d">
+        <ul class="zx-picker-list">
+          
+        </ul>
+      </div>
+      <div class="zx-tab-content" data-id="tab-a">
+        <ul class="zx-picker-list">
+          
+        </ul>
       </div>
     </div>
     <div class="zx-tab-footer">
@@ -317,10 +362,12 @@
       var self = this
       var _tab = $(panelBuffer)[0]
       $('body').append(_tab)
+      $('[data-id*="tab"]', _tab).tab(options)
       var ui = self.ui = {
         tab: _tab,
         ok: $('[data-id="btn-ok"]', _tab)[0],
         cancel: $('[data-id="btn-cancel"]', _tab)[0],
+        title: $('.zx-tab', _tab)[0],
         body: $('.zx-tab-container', _tab)[0],
         txt: $('.zx-tab-footer-txt', _tab)[0],
         num: $('.zx-tab-footer-num', _tab)[0],
@@ -330,13 +377,37 @@
       }
 
 
-
-      ui.cancel.addEventListener('tap', function (event) {
+      ui.title.addEventListener('click', function(e) {
+        e.preventDefault()
+        var targetBody
+        var className = 'active'
+        var CLASS_TAB_ITEM = 'zx-tab-item'
+        var CLASS_TAB_CONTENT = 'zx-tab-content'
+        var classSelector = '.' + className
+        var _self = this
+        var target = e.target || e.srcElement
+        var tabItems = _self.querySelector('.' + CLASS_TAB_ITEM)
+        var activeTab = _self.querySelector(classSelector + '.' + CLASS_TAB_ITEM)
+        if(activeTab) {
+          activeTab.classList.remove(className)
+        }
+        target.classList.add(className)
+        var hash = target.hash.replace('#', '')
+        targetBody = $('[data-id="'+hash+'"]', self.ui.body)[0]
+        var parentNode = targetBody.parentNode
+        activeBodies = parentNode.querySelectorAll('.' + CLASS_TAB_CONTENT + classSelector)
+        for (var i = 0; i < activeBodies.length; i++) {
+          var activeBody = activeBodies[i]
+          activeBody.parentNode === parentNode && activeBody.classList.remove(className)
+        }
+        targetBody.classList.add(className)
+      })
+      ui.cancel.addEventListener('click', function (event) {
         self.hide()
       }, false)
-      ui.ok.addEventListener('tap', function (event) {
+      ui.ok.addEventListener('click', function (event) {
         if (self.callback) {
-          var rs = self.callback(self.getSelectedItems())
+          var rs = self.callback(self.getSelected())
           if (rs !== false) {
             self.hide()
           }
@@ -344,47 +415,91 @@
       }, false)
       self._create(options)
     },
+    getSelected: function() {
+      var self = this
+      var ui = self.ui
+      // var type = self.option.type
+      var selected = {
+        type: '',
+        c: ui.c.tab.getSelectedUserItem(),
+        d: ui.d.tab.getSelectedUserItem()
+      }
+      return selected
+    },
     _createConcacts: function () {
       var self = this
-      var options = self.options
       var ui = self.ui
-      console.log(self, ui.c.tab)
-      if (options.userList) {
-        uArray = options.userList
-      }
-      ui.c.tab.setUserItems(uArray)
+      // $.ajax({
+      //   url: '',
+      //   methods: 'GET',
+      //   data: '',
+      //   success: function(res) {
+      //     if($.isArray(res)) {
+      //       ui.c.tab.setUserItems(res)
+      //     }
+      //   }
+      // }) 
     },
     _createDepartment: function () {
-
+      var self = this
+      var ui = self.ui
+      $.ajax({
+        url: 'dept.json',
+        methods: 'GET',
+        data: {
+          access_token: '81bcd198-8a13-490c-89e3-133cca4375d8'
+        },
+        success: function(res) {
+          if($.isArray(res)) {
+            ui.d.tab.setUserItems(res)
+          }
+        }
+      }) 
     },
     _createAllUsers: function () {
-
+      var self = this
+      var ui = self.ui
+      $.ajax({
+        url: 'alluser.json',
+        methods: 'GET',
+        data: {
+          access_token: '81bcd198-8a13-490c-89e3-133cca4375d8'
+        },
+        success: function(res) {
+          if($.isArray(res)) {
+            // ui.a.tab.setUserItems(res)
+          }
+        }
+      }) 
     },
     _create: function (options) {
       var self = this
       options = options || {}
-      options.userList = options.userList
+      options.selectList = options.selectList
       self.options = options
       var ui = self.ui
       self._createConcacts()
+      self._createDepartment()
     },
     //显示
     show: function (callback) {
       var self = this;
       self.callback = callback;
-      self.panel.classList.add($.className('active'))
+      var tab = self.ui.tab
+      $(tab).addClass('active')
     },
     //隐藏
     hide: function () {
       var self = this
       if (self.disposed) return
-      self.panel.classList.remove($.className('active'))
+      var tab = self.ui.tab
+      $(tab).removeClass('active')
     },
     dispose: function () {
       var self = this
       self.hide()
       setTimeout(function () {
-        self.panel.parentNode.removeChild(self.panel)
+        self.ui.tab.parentNode.removeChild(self.ui.tab)
         for (var name in self) {
           self[name] = null;
           delete self[name]

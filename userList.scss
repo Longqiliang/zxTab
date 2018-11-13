@@ -68,6 +68,11 @@ body{
   bottom: 0;
   left: 0;
   overflow: auto;
+  background-color: #fff;
+  display: none;
+  &.active{
+    display: block;
+  }
   .zx-tab{
     position: relative;
     display: table;
@@ -92,12 +97,19 @@ body{
       }
     }
     &-content{
+      display: none;
+      position: relative;
+      height: 100%;
+      &.active {
+        display: block;
+      }
     }
     &-container{
       &-item{
         position: relative;
         display: none;
       }
+      height: calc(100% - 40px);
       padding-bottom: 55px;
     }
     &-footer{
@@ -138,8 +150,10 @@ body{
  
 }
 .zx-picker-list{
-  margin: 10px 0 0;
-  padding: 0;
+  margin: 0;
+  padding: 10px 0 0 0;
+  height: 100%;
+  overflow: auto;
   &-item{
     padding: 10px 0 10px 80px;
     position: relative;

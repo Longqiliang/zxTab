@@ -66,6 +66,12 @@ body {
   bottom: 0;
   left: 0;
   overflow: auto;
+  background-color: #fff;
+  display: none;
+}
+
+.zx-layout.active {
+  display: block;
 }
 
 .zx-layout .zx-tab {
@@ -95,7 +101,18 @@ body {
   border-color: #007aff;
 }
 
+.zx-layout .zx-tab-content {
+  display: none;
+  position: relative;
+  height: 100%;
+}
+
+.zx-layout .zx-tab-content.active {
+  display: block;
+}
+
 .zx-layout .zx-tab-container {
+  height: calc(100% - 40px);
   padding-bottom: 55px;
 }
 
@@ -143,8 +160,10 @@ body {
 }
 
 .zx-picker-list {
-  margin: 10px 0 0;
-  padding: 0;
+  margin: 0;
+  padding: 10px 0 0 0;
+  height: 100%;
+  overflow: auto;
 }
 
 .zx-picker-list-item {
@@ -223,5 +242,11 @@ body {
 
 a {
   text-decoration: none;
+}
+
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 /*# sourceMappingURL=userList.css.map */

@@ -56,11 +56,15 @@
         e.preventDefault()
         var _self = this
         if(_self.zxtab) {
-
+          _self.zxtab.show(function(rs) {
+            console.log(rs)
+            _self.zxtab.dispose()
+						_self.zxtab = null
+          })
         } else {
-          var userList = [{name: '111',img: '/img/1.png'}]
+          var selectList = [{nickname: '代码兄弟',imgurl: 'http://thirdwx.qlogo.cn/mmopen/vi_32/1ct9f7VPl9LuX0gNbzQxDsSfibdkicvMSrVPSDfnCFOz2icTdxG52BwcJePbnSStibdJwwj3CkIuaT6rbwK2gRuPUQ/132', userid: '0adf89772f72487caf79f49547d0ca50'}]
           var options = {
-            userList: userList
+            selectList: selectList
           }
           _self.zxtab = new $.PopTab(options)
           _self.zxtab.show(function(rs) {
