@@ -90,7 +90,7 @@
                 <img src="' + item.imgurl + '" >\
               </div>\
               <div class="item-content item-checkbox ellipsis">\
-                <input type="checkbox" class="zx-checked" name="checkbox1" value="'+ item.userid +'">\
+                <input type="checkbox" class="zx-checked" name="checkbox1" value="'+ item.userid +'" data-name="' + item.nickname + '" data-img="' + item.imgurl + '">\
                 <span>' + item.nickname + '</span>\
               </div>\
             </li>'
@@ -117,8 +117,19 @@
 
   UserList.prototype.getSelectedUserItem = function () {
     var self = this
-    console.log(self)
-    return self.items
+    var checkboxArray = [].slice.call( self.holder.querySelectorAll('input[type="checkbox"]'))
+		var checkedValues = []
+    checkboxArray.forEach(function(box) {
+      if (box.checked) {
+        var obj = {
+          nickname: $(box).attr('data-name'),
+          imgurl: $(box).attr('data-img'),
+          userid: $(box).val()
+        }
+        checkedValues.push(obj)
+      }
+    })
+    return checkedValues
   }
 
   UserList.prototype.getSelectedAllItem = function () {
@@ -402,9 +413,48 @@
         }
         targetBody.classList.add(className)
       })
+
+      ui.body.addEventListener('change', function() {
+        var checkedValues = []
+        var selectArray = [].slice.call(ui.body.querySelectorAll('input[type="checkbox"]:checked'))
+        var uniqueArray = $.unique(selectArray)
+
+        // uniqueArray.each(function() {
+        //   if (this.checked) {
+        //     var obj = {
+        //       nickname: $(this).attr('data-name'),
+        //       imgurl: $(this).attr('data-img'),
+        //       userid: $(this).val()
+        //     }
+        //     checkedValues.push(obj)
+        //   }
+        // })
+        uniqueArray.forEach(function(box) {
+          if (box.checked) {
+            var obj = {
+              nickname: $(box).attr('data-name'),
+              imgurl: $(box).attr('data-img'),
+              userid: $(box).val()
+            }
+            checkedValues.push(obj)
+          }
+        })
+        var count = uniqueArray.length
+        console.log(ui, uniqueArray)
+        if(count) {
+          ui.txt.classList.add('active')
+          ui.num.innerText = count
+        } else {
+          ui.txt.classList.remove('active')
+          ui.num.innerText = 0
+        }
+        
+      })
+
       ui.cancel.addEventListener('click', function (event) {
         self.hide()
       }, false)
+
       ui.ok.addEventListener('click', function (event) {
         if (self.callback) {
           var rs = self.callback(self.getSelected())
@@ -429,16 +479,18 @@
     _createConcacts: function () {
       var self = this
       var ui = self.ui
-      // $.ajax({
-      //   url: '',
-      //   methods: 'GET',
-      //   data: '',
-      //   success: function(res) {
-      //     if($.isArray(res)) {
-      //       ui.c.tab.setUserItems(res)
-      //     }
-      //   }
-      // }) 
+      $.ajax({
+        url: 'dept.json',
+        methods: 'GET',
+        data: {
+          access_token: '81bcd198-8a13-490c-89e3-133cca4375d8'
+        },
+        success: function(res) {
+          if($.isArray(res)) {
+            ui.c.tab.setUserItems(res)
+          }
+        }
+      }) 
     },
     _createDepartment: function () {
       var self = this

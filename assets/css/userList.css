@@ -145,8 +145,12 @@ body {
 
 .zx-layout .zx-tab-footer-txt {
   font-size: 15px;
-  display: inline-block;
+  display: none;
   line-height: 28px;
+}
+
+.zx-layout .zx-tab-footer-txt.active {
+  display: inline-block;
 }
 
 .zx-layout .zx-tab-footer-num {
