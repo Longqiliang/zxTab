@@ -65,15 +65,19 @@
 
   }
 
-  UserList.prototype.triggerChange = function (force) {
+  UserList.prototype.triggerChange = function () {
     var self = this
-    var items = self.items
+    var checkboxAll = [].slice.call(self.holder.querySelectorAll('input[type=checkbox]'))
     var selectList = self.selectList
-    for (var item in items) {
+
+    for (var item in checkboxAll) {
+      var checkbox = checkboxAll[item]
+      var val = checkbox.value
       for ( var select in selectList) {
-        if(selectList[select].userid === items[item].userid) {
-          var checkbox = self.holder.querySelector('input[type=checkbox]')
-          $(checkbox).click()
+        if(selectList[select].userid === val) {
+          if(!checkbox.checked) {
+            $(checkbox).click()
+          }
         }
       }
     }
@@ -99,18 +103,24 @@
     })
     self.list.innerHTML = buffer.join('')
     self.findElementItems()
-    self.triggerChange(true)
+    self.triggerChange()
   }
 
   UserList.prototype.setAllUserItems = function (item) {
     var self = this
-    self.items = items || []
+    self.items = item || []
     var buffer = []
+    initials(self, item)
+
   }
 
   UserList.prototype.setSelectedUserItem = function () {
     var self = this
-    return self.items
+    console.log(self)
+    for(var index in self.selectList) {
+      var item = self.selectList[index]
+
+    }
 
 
   }
@@ -161,177 +171,74 @@
 		$(function() {
 			$('.zx-tab-content').tab()
 		})
-	}
+  }
+  
+  // 递归函数
+  function deepLoop(arr) {
+    if($.isArray(arr)) {
+      var deepArr = []
+      for(item in arr) {
+        if(arr[item].nodetype == 'user') {
+          deepArr.push(arr[item])
+        }else {
+          deepLoop(arr[item].children)
+        }
+      }
+    }
+    return deepArr
+  }
 
+  // 全部人员排序
+  function initials(self, items) { 
+    var buffer = []
+    var $SortBox = $(self.list)
+    var sortItems = items.sort(asc_sort) // 按首字母排序
+    var caseItems = []
+    sortItems.forEach(function (item) {
+      if (item) {
+        var labelDom = ''
+        var itemDom = '<li class="zx-picker-list-item">\
+              <div class="item-img-box">\
+                <img src="' + item.imgurl + '" >\
+              </div>\
+              <div class="item-content item-checkbox ellipsis">\
+                <input type="checkbox" class="zx-checked" name="checkbox1" value="'+ item.userid +'" data-name="' + item.nickname + '" data-img="' + item.imgurl + '">\
+                <span>' + item.nickname + '</span>\
+              </div>\
+            </li>'
+        var caseItem = makePy(item.nickname.charAt(0).toUpperCase())[0]
+        if (caseItem >= 'A' && caseItem <= 'Z') {
+          if (caseItems.indexOf(caseItem) === -1) {
+            labelDom = '<li class="zx-picker-list-item-label" data-id="'+caseItem+'">'+caseItem+'</li>'
+            caseItems.push(caseItem)
+          }
+        } 
+        buffer.push(labelDom + itemDom)
+      }
+    })
+    $SortBox.html(buffer.join(''))
+    self.findElementItems()
+    self.triggerChange()
 
-  // var Initials = $('.initials');
-  // var LetterBox = $('#letter');
-  // Initials.find('ul').append(
-  //   '<li>A</li><li>B</li><li>C</li><li>D</li><li>E</li><li>F</li><li>G</li><li>H</li><li>I</li><li>J</li><li>K</li><li>L</li><li>M</li><li>N</li><li>O</li><li>P</li><li>Q</li><li>R</li><li>S</li><li>T</li><li>U</li><li>V</li><li>W</li><li>X</li><li>Y</li><li>Z</li><li>#</li>'
-  // );
-  // //initials();
-  // $('.tab').on('click', '.tab-item', function (e) {
-  //   e.preventDefault()
-  //   var $this = $(this)
-  //   $this.addClass('active').siblings().removeClass('active')
-  // })
-  // $(".initials ul li").click(function () {
-  //   var _this = $(this);
-  //   var LetterHtml = _this.html();
-  //   LetterBox.html(LetterHtml).fadeIn();
+    function asc_sort(a, b) {
+      return makePy(a.nickname.charAt(0).toUpperCase()) < makePy(b.nickname.charAt(0).toUpperCase()) ? -1 : 1
+    }
 
-  //   Initials.css('background', 'rgba(145,145,145,0.6)');
+  }
 
-  //   setTimeout(function () {
-  //     Initials.css('background', 'rgba(145,145,145,0)');
-  //     LetterBox.fadeOut();
-  //   }, 1000);
+  // 对象数组去重方法
+  function uniq(arr, key){
+    let result = {};
+     let finalResult=[];
+     for(let i=0;i<arr.length;i++){
+         result[ (arr[i])[key]]=arr[i];
+     }
 
-  //   var _index = _this.index()
-  //   if (_index == 0) {
-  //     $('html,body').animate({
-  //       scrollTop: '0px'
-  //     }, 300); //点击第一个滚到顶部
-  //   } else if (_index == 27) {
-  //     var DefaultTop = $('#default').position().top;
-  //     $('html,body').animate({
-  //       scrollTop: DefaultTop + 'px'
-  //     }, 300); //点击最后一个滚到#号
-  //   } else {
-  //     var letter = _this.text();
-  //     if ($('#' + letter).length > 0) {
-  //       var LetterTop = $('#' + letter).position().top;
-  //       $('html,body').animate({
-  //         scrollTop: LetterTop - 45 + 'px'
-  //       }, 300);
-  //     }
-  //   }
-  // })
-
-  // var windowHeight = $(window).height();
-  // var InitHeight = windowHeight - 45;
-  // Initials.height(InitHeight);
-  // var LiHeight = InitHeight / 28;
-  // Initials.find('li').height(LiHeight);
-
-
-
-  // function initials() { //人员排序
-  //   var SortList = $(".sort_list");
-  //   var SortBox = $(".sort_box");
-  //   SortList.sort(asc_sort).appendTo('.sort_box'); //按首字母排序
-  //   function asc_sort(a, b) {
-  //     return makePy($(b).find('.num_name').text().charAt(0))[0].toUpperCase() < makePy($(a).find('.num_name').text()
-  //       .charAt(
-  //         0))[0].toUpperCase() ? 1 : -1;
-  //   }
-
-  //   var initials = [];
-  //   var num = 0;
-  //   SortList.each(function (i) {
-  //     var initial = makePy($(this).find('.num_name').text().charAt(0))[0].toUpperCase();
-  //     if (initial >= 'A' && initial <= 'Z') {
-  //       if (initials.indexOf(initial) === -1)
-  //         initials.push(initial);
-  //     } else {
-  //       num++;
-  //     }
-  //   });
-
-  //   $.each(initials, function (index, value) { //添加首字母标签
-  //     SortBox.append('<div class="sort_letter" id="' + value + '">' + value + '</div>');
-  //   });
-  //   if (num != 0) {
-  //     SortBox.append('<div class="sort_letter" id="default">#</div>');
-  //   }
-
-  //   for (var i = 0; i < SortList.length; i++) { //插入到对应的首字母后面
-  //     var letter = makePy(SortList.eq(i).find('.num_name').text().charAt(0))[0].toUpperCase();
-  //     switch (letter) {
-  //       case "A":
-  //         $('#A').after(SortList.eq(i));
-  //         break;
-  //       case "B":
-  //         $('#B').after(SortList.eq(i));
-  //         break;
-  //       case "C":
-  //         $('#C').after(SortList.eq(i));
-  //         break;
-  //       case "D":
-  //         $('#D').after(SortList.eq(i));
-  //         break;
-  //       case "E":
-  //         $('#E').after(SortList.eq(i));
-  //         break;
-  //       case "F":
-  //         $('#F').after(SortList.eq(i));
-  //         break;
-  //       case "G":
-  //         $('#G').after(SortList.eq(i));
-  //         break;
-  //       case "H":
-  //         $('#H').after(SortList.eq(i));
-  //         break;
-  //       case "I":
-  //         $('#I').after(SortList.eq(i));
-  //         break;
-  //       case "J":
-  //         $('#J').after(SortList.eq(i));
-  //         break;
-  //       case "K":
-  //         $('#K').after(SortList.eq(i));
-  //         break;
-  //       case "L":
-  //         $('#L').after(SortList.eq(i));
-  //         break;
-  //       case "M":
-  //         $('#M').after(SortList.eq(i));
-  //         break;
-  //       case "N":
-  //         $('#N').after(SortList.eq(i));
-  //         break;
-  //       case "O":
-  //         $('#O').after(SortList.eq(i));
-  //         break;
-  //       case "P":
-  //         $('#P').after(SortList.eq(i));
-  //         break;
-  //       case "Q":
-  //         $('#Q').after(SortList.eq(i));
-  //         break;
-  //       case "R":
-  //         $('#R').after(SortList.eq(i));
-  //         break;
-  //       case "S":
-  //         $('#S').after(SortList.eq(i));
-  //         break;
-  //       case "T":
-  //         $('#T').after(SortList.eq(i));
-  //         break;
-  //       case "U":
-  //         $('#U').after(SortList.eq(i));
-  //         break;
-  //       case "V":
-  //         $('#V').after(SortList.eq(i));
-  //         break;
-  //       case "W":
-  //         $('#W').after(SortList.eq(i));
-  //         break;
-  //       case "X":
-  //         $('#X').after(SortList.eq(i));
-  //         break;
-  //       case "Y":
-  //         $('#Y').after(SortList.eq(i));
-  //         break;
-  //       case "Z":
-  //         $('#Z').after(SortList.eq(i));
-  //         break;
-  //       default:
-  //         $('#default').after(SortList.eq(i));
-  //         break;
-  //     }
-  //   }
-  // }
+     for(item in result){
+         finalResult.push(result[item]);
+     }
+     return finalResult;
+  }
 })($, window, document);
 
 
@@ -355,6 +262,20 @@
         </ul>
       </div>
       <div class="zx-tab-content" data-id="tab-a">
+        <div class="zx-nav">
+          <div class="zx-navbar active">
+            <i class="zx-navbar-icon zxicon-zuzhi"></i>
+            <p class="zx-navbar-content">按组织架构</p>
+          </div>
+          <div class="zx-navbar active">
+            <i class="zx-navbar-icon zxicon-yonghuzu"></i>
+            <p class="zx-navbar-content">按用户组</p>
+          </div>
+          <div class="zx-navbar active">
+            <i class="zx-navbar-icon zxicon-jiaose"></i>
+            <p class="zx-navbar-content">按角色</p>
+          </div>
+        </div>
         <ul class="zx-picker-list">
           
         </ul>
@@ -412,24 +333,13 @@
           activeBody.parentNode === parentNode && activeBody.classList.remove(className)
         }
         targetBody.classList.add(className)
+        $(targetBody).tab().triggerChange()
       })
 
-      ui.body.addEventListener('change', function() {
+      ui.body.addEventListener('change', function(e) {
         var checkedValues = []
         var selectArray = [].slice.call(ui.body.querySelectorAll('input[type="checkbox"]:checked'))
-        var uniqueArray = $.unique(selectArray)
-
-        // uniqueArray.each(function() {
-        //   if (this.checked) {
-        //     var obj = {
-        //       nickname: $(this).attr('data-name'),
-        //       imgurl: $(this).attr('data-img'),
-        //       userid: $(this).val()
-        //     }
-        //     checkedValues.push(obj)
-        //   }
-        // })
-        uniqueArray.forEach(function(box) {
+        selectArray.forEach(function(box) {
           if (box.checked) {
             var obj = {
               nickname: $(box).attr('data-name'),
@@ -439,8 +349,13 @@
             checkedValues.push(obj)
           }
         })
-        var count = uniqueArray.length
-        console.log(ui, uniqueArray)
+        var setCheck = uniq(checkedValues, 'userid')
+
+        $(ui.c).tab().selectList = setCheck
+        $(ui.d).tab().selectList = setCheck
+        $(ui.a).tab().selectList = setCheck
+        
+        var count = setCheck.length
         if(count) {
           ui.txt.classList.add('active')
           ui.num.innerText = count
@@ -468,11 +383,8 @@
     getSelected: function() {
       var self = this
       var ui = self.ui
-      // var type = self.option.type
       var selected = {
-        type: '',
-        c: ui.c.tab.getSelectedUserItem(),
-        d: ui.d.tab.getSelectedUserItem()
+        selectList: ui.c.tab.selectList
       }
       return selected
     },
@@ -519,19 +431,21 @@
         },
         success: function(res) {
           if($.isArray(res)) {
-            // ui.a.tab.setUserItems(res)
+            var loopArr = deepLoop(res, [])
+            ui.a.tab.setAllUserItems(loopArr)
           }
         }
       }) 
+      
     },
     _create: function (options) {
       var self = this
       options = options || {}
-      options.selectList = options.selectList
       self.options = options
       var ui = self.ui
       self._createConcacts()
       self._createDepartment()
+      self._createAllUsers()
     },
     //显示
     show: function (callback) {
@@ -561,5 +475,31 @@
     }
   });
 
+  // 递归函数
+  function deepLoop(arr, deepArr) {
+    if($.isArray(arr)) {
+      for(item in arr) {
+        if(arr[item].nodetype != 'user') {
+          deepLoop(arr[item].children, deepArr)
+        }else {
+          deepArr.push(arr[item])
+        }
+      }
+    }
+    return deepArr
+  }
 
+  // 对象数组去重方法
+  function uniq(arr, key){
+    let result = {};
+     let finalResult=[];
+     for(let i=0;i<arr.length;i++){
+         result[(arr[i])[key]]=arr[i];
+     }
+
+     for(item in result){
+         finalResult.push(result[item]);
+     }
+     return finalResult;
+  }
 })($, document);
